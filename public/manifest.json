@@ -1,0 +1,43 @@
+{
+  "name": "Encontro com Deus — Central ECD",
+  "short_name": "Encontro com Deus",
+  "description": "Sistema de gestão do Encontro com Deus da Get Church Floripa",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111A24",
+  "theme_color": "#111A24",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/brand/emblema-ecd.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/emblema-ecd.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Check-in",
+      "url": "/checkin",
+      "description": "Fazer check-in de encontristas"
+    },
+    {
+      "name": "Cronograma",
+      "url": "/cronograma",
+      "description": "Ver cronograma ao vivo"
+    }
+  ]
+}

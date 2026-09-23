@@ -1,0 +1,704 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ============================================================
+// PESSOAS E USUÁRIOS
+// ============================================================
+
+model Pessoa {
+  id              String    @id @default(cuid())
+  nome_completo   String
+  nome_preferido  String?
+  sexo            String // masculino, feminino
+  telefone        String?
+  email           String?
+  data_nascimento DateTime?
+  cidade          String?
+  bairro          String?
+  cla             String?
+  lider_cla       String?
+  quem_convidou   String?
+  eh_pastor       Boolean   @default(false)
+  observacoes     String?
+  criado_em       DateTime  @default(now())
+  atualizado_em   DateTime  @updatedAt
+
+  usuario                          Usuario?
+  inscricoes                       Inscricao[]
+  participacoes                    ParticipacaoServo[]
+  pagamentos_registrados           Pagamento[]           @relation("RegistradoPor")
+  alocacoes_cama                   AlocacaoCama[]
+  vinculos_anjo_como_anjo          VinculoAnjo[]         @relation("Anjo")
+  vinculos_anjo_como_encontrista   VinculoAnjo[]         @relation("Encontrista")
+  alocacoes_turno                  AlocacaoTurno[]
+  torre_alocacoes                  TorreAlocacao[]
+  veiculos_motorista               Veiculo[]             @relation("Motorista")
+  embarques                        Embarque[]
+  caronas_ofertas                  CaronaOferta[]
+  caronas_pedidos                  CaronaPedido[]
+  atividades_ministrador           Atividade[]           @relation("Ministrador")
+  atividades_responsavel           Atividade[]           @relation("Responsavel")
+  selecoes_apoio_altar             SelecaoApoioAltar[]
+  fichas_aconselhamento_enviadas   FichaAconselhamento[] @relation("EnviadaPor")
+  fichas_aconselhamento_atribuidas FichaAconselhamento[] @relation("AtribuidaA")
+  mensagens                        Mensagem[]            @relation("MensagemPessoa")
+  mensagens_enviadas               Mensagem[]            @relation("MensagemEnviadaPor")
+  notificacoes                     Notificacao[]
+  auditoria                        Auditoria[]
+  compromissos_jejum               CompromissoJejum[]
+
+  @@map("pessoas")
+}
+
+model Usuario {
+  id         String   @id @default(cuid())
+  pessoa_id  String   @unique
+  pessoa     Pessoa   @relation(fields: [pessoa_id], references: [id])
+  email      String   @unique
+  senha_hash String?
+  perfis     String   @default("servo") // admin, lider_departamento, servo — separados por vírgula
+  permissoes String   @default("") // financeiro, saude, atendimento, cronograma — separadas por vírgula
+  ativo      Boolean  @default(true)
+  criado_em  DateTime @default(now())
+
+  sessions Session[]
+
+  @@map("usuarios")
+}
+
+model Session {
+  id            String   @id @default(cuid())
+  session_token String   @unique
+  usuario_id    String
+  usuario       Usuario  @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  expires       DateTime
+
+  @@map("sessions")
+}
+
+// ============================================================
+// ENCONTROS (EDIÇÕES)
+// ============================================================
+
+model Encontro {
+  id                                  String    @id @default(cuid())
+  nome                                String
+  tipo                                String // masculino, feminino
+  data_inicio                         DateTime
+  data_fim                            DateTime
+  local_id                            String?
+  local                               Local?    @relation(fields: [local_id], references: [id])
+  status                              String    @default("planejamento") // planejamento, inscricoes_abertas, em_andamento, encerrado
+  valor_inscricao                     Float     @default(0)
+  capacidade                          Int       @default(100)
+  prazo_ficha                         DateTime?
+  prazo_cartas                        DateTime?
+  meta_minima_cartas                  Int       @default(3)
+  link_grupo_whatsapp                 String?
+  horario_saida_onibus                String?
+  endereco_saida                      String?
+  lista_o_que_levar                   String?
+  permite_link_familia_compartilhavel Boolean   @default(false)
+  configuracoes                       String    @default("{}") // JSON
+  criado_em                           DateTime  @default(now())
+
+  inscricoes            Inscricao[]
+  participacoes_servo   ParticipacaoServo[]
+  departamentos         Departamento[]
+  atividades            Atividade[]
+  torres                Torre[]
+  veiculos              Veiculo[]
+  caronas_ofertas       CaronaOferta[]
+  caronas_pedidos       CaronaPedido[]
+  alocacoes_cama        AlocacaoCama[]
+  vinculos_anjo         VinculoAnjo[]
+  fichas_aconselhamento FichaAconselhamento[]
+  mensagens             Mensagem[]
+  formulario_campos     FormularioCampo[]
+  compromissos_jejum    CompromissoJejum[]
+
+  @@map("encontros")
+}
+
+// ============================================================
+// LOCAIS E HOSPEDAGEM
+// ============================================================
+
+model Local {
+  id       String  @id @default(cuid())
+  nome     String
+  endereco String?
+
+  encontros Encontro[]
+  quartos   Quarto[]
+
+  @@map("locais")
+}
+
+model Quarto {
+  id               String  @id @default(cuid())
+  local_id         String
+  local            Local   @relation(fields: [local_id], references: [id])
+  nome             String
+  andar            String?
+  tipo             String  @default("dormitorio") // dormitorio, quartos_superiores, casa_auxiliar
+  numerado         Boolean @default(true)
+  capacidade_livre Int? // para espaços sem numeração
+  uso_padrao       String? // encontristas, servos, pastores
+
+  camas          Cama[]
+  alocacoes_cama AlocacaoCama[]
+
+  @@map("quartos")
+}
+
+model Cama {
+  id         String  @id @default(cuid())
+  quarto_id  String
+  quarto     Quarto  @relation(fields: [quarto_id], references: [id])
+  codigo     String // ex.: 12A
+  indice_par Int?
+  posicao    String // inferior, superior, solteiro
+  ativa      Boolean @default(true)
+
+  alocacoes AlocacaoCama[]
+
+  @@map("camas")
+}
+
+model AlocacaoCama {
+  id          String   @id @default(cuid())
+  encontro_id String
+  encontro    Encontro @relation(fields: [encontro_id], references: [id])
+  cama_id     String?
+  cama        Cama?    @relation(fields: [cama_id], references: [id])
+  quarto_id   String? // para espaços sem numeração
+  quarto      Quarto?  @relation(fields: [quarto_id], references: [id])
+  pessoa_id   String
+  pessoa      Pessoa   @relation(fields: [pessoa_id], references: [id])
+  papel       String   @default("encontrista") // encontrista, anjo, servo, pastor
+  travada     Boolean  @default(false)
+
+  @@unique([encontro_id, cama_id, pessoa_id])
+  @@map("alocacoes_cama")
+}
+
+model VinculoAnjo {
+  id                    String    @id @default(cuid())
+  encontro_id           String
+  encontro              Encontro  @relation(fields: [encontro_id], references: [id])
+  anjo_pessoa_id        String
+  anjo                  Pessoa    @relation("Anjo", fields: [anjo_pessoa_id], references: [id])
+  encontrista_pessoa_id String
+  encontrista           Pessoa    @relation("Encontrista", fields: [encontrista_pessoa_id], references: [id])
+  inscricao_id          String
+  inscricao             Inscricao @relation(fields: [inscricao_id], references: [id])
+
+  @@map("vinculos_anjo")
+}
+
+// ============================================================
+// INSCRIÇÕES
+// ============================================================
+
+model Inscricao {
+  id              String    @id @default(cuid())
+  encontro_id     String
+  encontro        Encontro  @relation(fields: [encontro_id], references: [id])
+  pessoa_id       String
+  pessoa          Pessoa    @relation(fields: [pessoa_id], references: [id])
+  status          String    @default("confirmado") // confirmado, cancelado
+  codigo          String // 3 dígitos por edição, ex.: 045
+  qr_token        String    @unique @default(cuid())
+  valor_total     Float     @default(0)
+  ficha_status    String    @default("pendente") // pendente, enviada, concluida
+  ficha_token     String    @unique @default(cuid())
+  entrou_no_grupo Boolean   @default(false)
+  checkin_em      DateTime?
+  checkin_por     String?
+  veiculo_id      String?
+  veiculo         Veiculo?  @relation(fields: [veiculo_id], references: [id])
+  observacoes     String?
+  criado_em       DateTime  @default(now())
+
+  pagamentos            Pagamento[]
+  ficha_respostas       FichaResposta?
+  contatos_emergencia   ContatoEmergencia[]
+  indicacoes_carta      IndicacaoCarta[]
+  cartas                Carta[]
+  vinculos_anjo         VinculoAnjo[]
+  fichas_aconselhamento FichaAconselhamento[]
+  mensagens             Mensagem[]
+
+  @@unique([encontro_id, codigo])
+  @@map("inscricoes")
+}
+
+// ============================================================
+// PAGAMENTOS (simplificado)
+// ============================================================
+
+model Pagamento {
+  id                String    @id @default(cuid())
+  inscricao_id      String
+  inscricao         Inscricao @relation(fields: [inscricao_id], references: [id])
+  valor             Float
+  forma             String // pix, cartao, dinheiro, outro
+  data              DateTime  @default(now())
+  registrado_por_id String?
+  registrado_por    Pessoa?   @relation("RegistradoPor", fields: [registrado_por_id], references: [id])
+  observacoes       String?
+
+  @@map("pagamentos")
+}
+
+// ============================================================
+// FICHA DO ENCONTRISTA
+// ============================================================
+
+model FormularioCampo {
+  id                      String   @id @default(cuid())
+  encontro_id             String
+  encontro                Encontro @relation(fields: [encontro_id], references: [id])
+  chave                   String
+  rotulo                  String
+  tipo                    String // texto, texto_longo, sim_nao, escolha, data, telefone
+  obrigatorio             Boolean  @default(false)
+  sensivel                Boolean  @default(false)
+  compartilhavel_com_anjo Boolean  @default(false)
+  ordem                   Int      @default(0)
+  opcoes                  String? // JSON array de opções
+
+  @@map("formulario_campos")
+}
+
+model FichaResposta {
+  id                String    @id @default(cuid())
+  inscricao_id      String    @unique
+  inscricao         Inscricao @relation(fields: [inscricao_id], references: [id])
+  respostas         String    @default("{}") // JSON
+  consentimento_em  DateTime?
+  versao_formulario String?
+
+  @@map("ficha_respostas")
+}
+
+model ContatoEmergencia {
+  id            String    @id @default(cuid())
+  inscricao_id  String
+  inscricao     Inscricao @relation(fields: [inscricao_id], references: [id])
+  nome          String
+  parentesco    String?
+  telefone      String?
+  email         String?
+  token_familia String    @unique @default(cuid())
+
+  @@map("contatos_emergencia")
+}
+
+// ============================================================
+// CARTAS
+// ============================================================
+
+model IndicacaoCarta {
+  id           String    @id @default(cuid())
+  inscricao_id String
+  inscricao    Inscricao @relation(fields: [inscricao_id], references: [id])
+  indicado_por String?
+  nome         String
+  relacao      String?
+  telefone     String?
+  token_carta  String    @unique @default(cuid())
+  status       String    @default("aguardando_envio") // aguardando_envio, convite_enviado, aberto, carta_recebida
+
+  cartas Carta[]
+
+  @@map("indicacoes_carta")
+}
+
+model Carta {
+  id                 String          @id @default(cuid())
+  inscricao_id       String
+  inscricao          Inscricao       @relation(fields: [inscricao_id], references: [id])
+  indicacao_id       String?
+  indicacao          IndicacaoCarta? @relation(fields: [indicacao_id], references: [id])
+  remetente_nome     String
+  relacao            String?
+  origem             String          @default("texto_digital") // texto_digital, foto_manuscrita, carta_fisica, carta_equipe
+  conteudo           String?
+  arquivo_path       String?
+  status             String          @default("recebida") // recebida, aprovada, sinalizada, impressa, entregue
+  motivo_sinalizacao String?
+  revisada_por       String?
+  criado_em          DateTime        @default(now())
+
+  @@map("cartas")
+}
+
+// ============================================================
+// SERVOS E DEPARTAMENTOS
+// ============================================================
+
+model ParticipacaoServo {
+  id               String   @id @default(cuid())
+  encontro_id      String
+  encontro         Encontro @relation(fields: [encontro_id], references: [id])
+  pessoa_id        String
+  pessoa           Pessoa   @relation(fields: [pessoa_id], references: [id])
+  status           String   @default("confirmado") // interessado, confirmado, cancelado
+  departamentos    String   @default("") // IDs separados por vírgula
+  eh_anjo          Boolean  @default(false)
+  capacidade_anjo  Int      @default(2)
+  experiente       Boolean  @default(false)
+  como_vai         String   @default("onibus") // onibus, carro_proprio, precisa_carona
+  chegada_prevista String?
+  observacoes      String?
+
+  @@unique([encontro_id, pessoa_id])
+  @@map("participacoes_servo")
+}
+
+model Departamento {
+  id          String   @id @default(cuid())
+  encontro_id String
+  encontro    Encontro @relation(fields: [encontro_id], references: [id])
+  nome        String
+  descricao   String?
+  icone       String?
+  lideres     String   @default("") // IDs de pessoas separados por vírgula
+  chegada_ate String? // horário limite
+
+  turnos Turno[]
+
+  @@map("departamentos")
+}
+
+model Turno {
+  id              String       @id @default(cuid())
+  encontro_id     String
+  departamento_id String
+  departamento    Departamento @relation(fields: [departamento_id], references: [id])
+  titulo          String
+  inicio          DateTime
+  fim             DateTime
+  local           String?
+  vagas           Int?
+
+  alocacoes AlocacaoTurno[]
+
+  @@map("turnos")
+}
+
+model AlocacaoTurno {
+  id         String    @id @default(cuid())
+  turno_id   String
+  turno      Turno     @relation(fields: [turno_id], references: [id])
+  pessoa_id  String
+  pessoa     Pessoa    @relation(fields: [pessoa_id], references: [id])
+  status     String    @default("confirmado")
+  checkin_em DateTime?
+
+  @@unique([turno_id, pessoa_id])
+  @@map("alocacoes_turno")
+}
+
+// ============================================================
+// TORRE DE ORAÇÃO E GUERRA
+// ============================================================
+
+model Torre {
+  id                String   @id @default(cuid())
+  encontro_id       String
+  encontro          Encontro @relation(fields: [encontro_id], references: [id])
+  tipo              String // oracao_semana, guerra_encontro
+  inicio            DateTime
+  fim               DateTime
+  duracao_turno_min Int      @default(60)
+  minimo_por_turno  Int      @default(1)
+
+  torre_turnos TorreTurno[]
+
+  @@map("torres")
+}
+
+model TorreTurno {
+  id       String   @id @default(cuid())
+  torre_id String
+  torre    Torre    @relation(fields: [torre_id], references: [id])
+  inicio   DateTime
+  fim      DateTime
+
+  alocacoes TorreAlocacao[]
+
+  @@map("torre_turnos")
+}
+
+model TorreAlocacao {
+  id          String     @id @default(cuid())
+  turno_id    String
+  turno       TorreTurno @relation(fields: [turno_id], references: [id])
+  pessoa_id   String
+  pessoa      Pessoa     @relation(fields: [pessoa_id], references: [id])
+  iniciou_em  DateTime?
+  concluiu_em DateTime?
+
+  @@unique([turno_id, pessoa_id])
+  @@map("torre_alocacoes")
+}
+
+// ============================================================
+// TRANSPORTE E CARONAS
+// ============================================================
+
+model Veiculo {
+  id            String    @id @default(cuid())
+  encontro_id   String
+  encontro      Encontro  @relation(fields: [encontro_id], references: [id])
+  tipo          String    @default("onibus") // onibus, van, carro_apoio
+  nome          String
+  capacidade    Int       @default(50)
+  motorista_id  String?
+  motorista     Pessoa?   @relation("Motorista", fields: [motorista_id], references: [id])
+  horario_saida DateTime?
+
+  inscricoes Inscricao[]
+  embarques  Embarque[]
+
+  @@map("veiculos")
+}
+
+model Embarque {
+  id          String    @id @default(cuid())
+  veiculo_id  String
+  veiculo     Veiculo   @relation(fields: [veiculo_id], references: [id])
+  pessoa_id   String
+  pessoa      Pessoa    @relation(fields: [pessoa_id], references: [id])
+  embarcou_em DateTime?
+
+  @@unique([veiculo_id, pessoa_id])
+  @@map("embarques")
+}
+
+model CaronaOferta {
+  id            String    @id @default(cuid())
+  encontro_id   String
+  encontro      Encontro  @relation(fields: [encontro_id], references: [id])
+  motorista_id  String
+  motorista     Pessoa    @relation(fields: [motorista_id], references: [id])
+  regiao_saida  String?
+  horario_saida DateTime?
+  vagas         Int       @default(1)
+  observacoes   String?
+
+  combinadas CaronaCombinada[] @relation("OfertaCombinada")
+
+  @@map("caronas_ofertas")
+}
+
+model CaronaPedido {
+  id                  String    @id @default(cuid())
+  encontro_id         String
+  encontro            Encontro  @relation(fields: [encontro_id], references: [id])
+  pessoa_id           String
+  pessoa              Pessoa    @relation(fields: [pessoa_id], references: [id])
+  regiao              String?
+  disponivel_a_partir DateTime?
+  status              String    @default("aberto") // aberto, combinado
+
+  combinadas CaronaCombinada[] @relation("PedidoCombinado")
+
+  @@map("caronas_pedidos")
+}
+
+model CaronaCombinada {
+  id        String       @id @default(cuid())
+  oferta_id String
+  oferta    CaronaOferta @relation("OfertaCombinada", fields: [oferta_id], references: [id])
+  pedido_id String
+  pedido    CaronaPedido @relation("PedidoCombinado", fields: [pedido_id], references: [id])
+  status    String       @default("proposta") // proposta, confirmada
+
+  @@map("caronas_combinadas")
+}
+
+// ============================================================
+// CRONOGRAMA
+// ============================================================
+
+model Atividade {
+  id                      String    @id @default(cuid())
+  encontro_id             String
+  encontro                Encontro  @relation(fields: [encontro_id], references: [id])
+  dia                     Int // 0=sexta, 1=sábado, 2=domingo
+  ordem                   Int
+  titulo                  String
+  tipo                    String // ministracao, refeicao, descanso, louvor, dinamica, logistica, outro
+  inicio_planejado        DateTime
+  duracao_planejada_min   Int
+  duracao_minima_min      Int?
+  ancora                  Boolean   @default(false)
+  ministrador_id          String?
+  ministrador             Pessoa?   @relation("Ministrador", fields: [ministrador_id], references: [id])
+  responsavel_id          String?
+  responsavel             Pessoa?   @relation("Responsavel", fields: [responsavel_id], references: [id])
+  local                   String?
+  toca_chofar             Boolean   @default(false)
+  antecedencia_chofar_min Int       @default(10)
+  avisa_cozinha           Boolean   @default(false)
+  inicio_real             DateTime?
+  fim_real                DateTime?
+  status                  String    @default("planejada") // planejada, em_andamento, concluida, pulada
+  notas                   String?
+
+  chamadas_equipe      ChamadaEquipe[]
+  selecoes_apoio_altar SelecaoApoioAltar[]
+
+  @@map("atividades")
+}
+
+model ChamadaEquipe {
+  id               String    @id @default(cuid())
+  atividade_id     String
+  atividade        Atividade @relation(fields: [atividade_id], references: [id])
+  nome             String
+  referencia       String    @default("inicio") // inicio, fim
+  deslocamento_min Int       @default(0)
+  destinatarios    String? // JSON
+  mensagem         String?
+  disparada_em     DateTime?
+
+  @@map("chamadas_equipe")
+}
+
+model SelecaoApoioAltar {
+  id             String    @id @default(cuid())
+  atividade_id   String
+  atividade      Atividade @relation(fields: [atividade_id], references: [id])
+  pessoa_id      String
+  pessoa         Pessoa    @relation(fields: [pessoa_id], references: [id])
+  confirmada_por String?
+
+  @@map("selecoes_apoio_altar")
+}
+
+// ============================================================
+// ATENDIMENTOS
+// ============================================================
+
+model FichaAconselhamento {
+  id                     String    @id @default(cuid())
+  encontro_id            String
+  encontro               Encontro  @relation(fields: [encontro_id], references: [id])
+  inscricao_id           String
+  inscricao              Inscricao @relation(fields: [inscricao_id], references: [id])
+  imagens                String    @default("") // JSON array de paths
+  enviada_por_id         String?
+  enviada_por            Pessoa?   @relation("EnviadaPor", fields: [enviada_por_id], references: [id])
+  atribuida_a_id         String?
+  atribuida_a            Pessoa?   @relation("AtribuidaA", fields: [atribuida_a_id], references: [id])
+  status                 String    @default("nova") // nova, atribuida, em_atendimento, concluida
+  precisa_acompanhamento Boolean   @default(false)
+  nota_curta             String? // até 280 chars
+  apagar_em              DateTime?
+  criado_em              DateTime  @default(now())
+
+  @@map("fichas_aconselhamento")
+}
+
+// ============================================================
+// MENSAGENS E COMUNICAÇÃO
+// ============================================================
+
+model Mensagem {
+  id                   String     @id @default(cuid())
+  encontro_id          String
+  encontro             Encontro   @relation(fields: [encontro_id], references: [id])
+  canal                String // whatsapp, email, push
+  template_chave       String?
+  pessoa_id            String?
+  pessoa               Pessoa?    @relation("MensagemPessoa", fields: [pessoa_id], references: [id])
+  inscricao_id         String?
+  inscricao            Inscricao? @relation(fields: [inscricao_id], references: [id])
+  destinatario_nome    String?
+  destinatario_contato String?
+  variaveis            String     @default("{}") // JSON
+  conteudo             String?
+  status               String     @default("pendente") // pendente, enviada_manualmente, falhou, cancelada
+  agendada_para        DateTime?
+  enviada_em           DateTime?
+  enviada_por_id       String?
+  enviada_por          Pessoa?    @relation("MensagemEnviadaPor", fields: [enviada_por_id], references: [id])
+  criado_em            DateTime   @default(now())
+
+  @@map("mensagens")
+}
+
+model TemplatesMensagem {
+  id            String @id @default(cuid())
+  chave         String @unique
+  canal         String // whatsapp, email, push
+  publico       String // encontrista, familia, indicado, servo
+  tipo_encontro String @default("ambos") // masculino, feminino, ambos
+  titulo        String
+  corpo         String
+
+  @@map("templates_mensagem")
+}
+
+// ============================================================
+// NOTIFICAÇÕES
+// ============================================================
+
+model Notificacao {
+  id         String   @id @default(cuid())
+  usuario_id String?
+  pessoa_id  String?
+  pessoa     Pessoa?  @relation(fields: [pessoa_id], references: [id])
+  titulo     String
+  corpo      String?
+  link       String?
+  lida       Boolean  @default(false)
+  criado_em  DateTime @default(now())
+
+  @@map("notificacoes")
+}
+
+// ============================================================
+// AUDITORIA
+// ============================================================
+
+model Auditoria {
+  id          String   @id @default(cuid())
+  usuario_id  String?
+  pessoa_id   String?
+  pessoa      Pessoa?  @relation(fields: [pessoa_id], references: [id])
+  acao        String
+  entidade    String
+  entidade_id String?
+  em          DateTime @default(now())
+  detalhes    String? // JSON
+
+  @@map("auditoria")
+}
+
+// ============================================================
+// JEJUM
+// ============================================================
+
+model CompromissoJejum {
+  id          String   @id @default(cuid())
+  encontro_id String
+  encontro    Encontro @relation(fields: [encontro_id], references: [id])
+  pessoa_id   String
+  pessoa      Pessoa   @relation(fields: [pessoa_id], references: [id])
+  descricao   String?
+  dias        String? // ex.: "sexta,sabado"
+
+  @@map("compromissos_jejum")
+}

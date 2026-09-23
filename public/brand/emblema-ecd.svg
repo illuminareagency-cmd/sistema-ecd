@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Círculo externo -->
+  <circle cx="100" cy="100" r="95" fill="#0A1119" stroke="#CFAE6E" stroke-width="2.5"/>
+  <circle cx="100" cy="100" r="88" fill="none" stroke="#CFAE6E" stroke-width="0.8" stroke-dasharray="4 3"/>
+
+  <!-- Cordeiro (esquerda, representado por forma estilizada) -->
+  <g transform="translate(38, 72)">
+    <!-- Corpo do cordeiro -->
+    <ellipse cx="28" cy="32" rx="22" ry="16" fill="none" stroke="#CFAE6E" stroke-width="1.8"/>
+    <!-- Cabeça -->
+    <circle cx="44" cy="22" r="10" fill="none" stroke="#CFAE6E" stroke-width="1.8"/>
+    <!-- Olho -->
+    <circle cx="47" cy="20" r="1.5" fill="#CFAE6E"/>
+    <!-- Orelha -->
+    <path d="M41 13 Q38 8 35 12" fill="none" stroke="#CFAE6E" stroke-width="1.5"/>
+    <!-- Pernas -->
+    <line x1="15" y1="46" x2="13" y2="58" stroke="#CFAE6E" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="22" y1="47" x2="21" y2="59" stroke="#CFAE6E" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="32" y1="47" x2="32" y2="59" stroke="#CFAE6E" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="40" y1="46" x2="41" y2="58" stroke="#CFAE6E" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Cauda -->
+    <path d="M6 34 Q0 30 2 24" fill="none" stroke="#CFAE6E" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- L\u00e3 (textura) -->
+    <path d="M12 28 Q16 22 20 28 Q24 22 28 28 Q32 22 36 28" fill="none" stroke="#CFAE6E" stroke-width="1.2"/>
+  </g>
+
+  <!-- Leão (direita, representado por forma estilizada) -->
+  <g transform="translate(104, 68)">
+    <!-- Corpo do leão -->
+    <ellipse cx="28" cy="36" rx="22" ry="16" fill="none" stroke="#CFAE6E" stroke-width="1.8"/>
+    <!-- Cabeça com juba -->
+    <circle cx="12" cy="24" r="12" fill="none" stroke="#CFAE6E" stroke-width="1.8"/>
+    <!-- Juba (raios ao redor) -->
+    <circle cx="12" cy="24" r="18" fill="none" stroke="#CFAE6E" stroke-width="0.8" opacity="0.6"/>
+    <!-- Olho -->
+    <circle cx="9" cy="22" r="1.5" fill="#CFAE6E"/>
+    <!-- Nariz e boca -->
+    <path d="M11 27 Q12 29 13 27" fill="none" stroke="#CFAE6E" stroke-width="1.2"/>
+    <!-- Orelha -->
+    <path d="M15 13 Q18 8 21 12" fill="none" stroke="#CFAE6E" stroke-width="1.5"/>
+    <!-- Pernas -->
+    <line x1="16" y1="50" x2="15" y2="62" stroke="#CFAE6E" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="24" y1="51" x2="23" y2="63" stroke="#CFAE6E" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="33" y1="51" x2="33" y2="63" stroke="#CFAE6E" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="41" y1="50" x2="42" y2="62" stroke="#CFAE6E" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Cauda com penacho -->
+    <path d="M50 36 Q58 30 56 22 Q60 18 58 14" fill="none" stroke="#CFAE6E" stroke-width="1.5" stroke-linecap="round"/>
+    <ellipse cx="58" cy="12" rx="4" ry="3" fill="none" stroke="#CFAE6E" stroke-width="1.2"/>
+  </g>
+
+  <!-- Videira central unindo os dois -->
+  <g>
+    <!-- Haste principal -->
+    <path d="M100 145 L100 100 Q100 85 85 78 M100 100 Q100 85 115 78" fill="none" stroke="#CFAE6E" stroke-width="2" stroke-linecap="round"/>
+    <!-- Galhos laterais -->
+    <path d="M100 110 Q90 105 80 110" fill="none" stroke="#CFAE6E" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M100 110 Q110 105 120 110" fill="none" stroke="#CFAE6E" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Cachos de uva (esquerda) -->
+    <circle cx="76" cy="114" r="3" fill="#CFAE6E" opacity="0.9"/>
+    <circle cx="82" cy="117" r="3" fill="#CFAE6E" opacity="0.9"/>
+    <circle cx="73" cy="120" r="3" fill="#CFAE6E" opacity="0.8"/>
+    <circle cx="79" cy="123" r="3" fill="#CFAE6E" opacity="0.8"/>
+    <circle cx="85" cy="121" r="3" fill="#CFAE6E" opacity="0.8"/>
+    <!-- Cachos de uva (direita) -->
+    <circle cx="124" cy="114" r="3" fill="#CFAE6E" opacity="0.9"/>
+    <circle cx="118" cy="117" r="3" fill="#CFAE6E" opacity="0.9"/>
+    <circle cx="127" cy="120" r="3" fill="#CFAE6E" opacity="0.8"/>
+    <circle cx="121" cy="123" r="3" fill="#CFAE6E" opacity="0.8"/>
+    <circle cx="115" cy="121" r="3" fill="#CFAE6E" opacity="0.8"/>
+    <!-- Folhas -->
+    <ellipse cx="88" cy="100" rx="7" ry="4" transform="rotate(-30 88 100)" fill="none" stroke="#CFAE6E" stroke-width="1.3"/>
+    <ellipse cx="112" cy="100" rx="7" ry="4" transform="rotate(30 112 100)" fill="none" stroke="#CFAE6E" stroke-width="1.3"/>
+    <ellipse cx="100" cy="88" rx="7" ry="4" fill="none" stroke="#CFAE6E" stroke-width="1.3"/>
+  </g>
+
+  <!-- Estrelas decorativas nos cantos -->
+  <g fill="#CFAE6E" opacity="0.4">
+    <polygon points="100,12 102,18 108,18 103,22 105,28 100,24 95,28 97,22 92,18 98,18" />
+    <circle cx="30" cy="100" r="2"/>
+    <circle cx="170" cy="100" r="2"/>
+    <circle cx="100" cy="170" r="2"/>
+  </g>
+
+  <!-- Texto: ECD -->
+  <text x="100" y="164" text-anchor="middle" font-family="Georgia, serif" font-size="11" letter-spacing="8" fill="#CFAE6E" font-weight="normal">ECD</text>
+</svg>
